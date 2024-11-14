@@ -1,0 +1,5 @@
+# System-level files
+.DS_Store
+
+# Matlab autosaves
+*.asv

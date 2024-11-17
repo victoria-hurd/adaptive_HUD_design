@@ -7,9 +7,9 @@
 % Display data - each row is a different kind of data to display
 % Each column is a time point
 
-% Number of points to simulate - we can keep this at 100 since we
-% interpolate to match the number of frames in the video
-numpts = 100;
+% Number of points to simulate - keep this at 2617. This is the number of
+% frames in HUDFootage
+numpts = 2617;
 
 % "time point" is row 1
 displayData = 1:numpts;
@@ -30,7 +30,7 @@ writematrix(displayData,'data/displayData.csv')
 % "time point" is row 1
 eventData(1,:) = 1:numpts;
 
-% Create alert at timepoint 25 - this can get changed
+% Create alert at frame 200 - this can get changed
 alertFrame = 25;
 
 % Create mock event data - each row is a kind of alert
@@ -39,8 +39,4 @@ eventData(2,alertFrame) = 1;
 
 % Save data
 writematrix(eventData,'data/eventData.csv')
-
-%% Testing Data Displays
-% based on number of frames, upsample event data and display data
-% We want the number of frames
 

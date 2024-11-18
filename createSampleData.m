@@ -26,16 +26,21 @@ writematrix(displayData,'data/displayData.csv')
 %% Create Event Data
 % Event data - binary 0 or 1
 % % 1 indicates alert, 0 indicates no alert
+% Number of points to simulate - keep this at 2617. This is the number of
+% frames in HUDFootage
+numpts = 2617;
 
 % "time point" is row 1
 eventData(1,:) = 1:numpts;
 
 % Create alert at frame 200 - this can get changed
+% Alert should stay for 10 frames
 alertFrame = 25;
+alertDuration = 10;
 
 % Create mock event data - each row is a kind of alert
 eventData(2,:) = zeros(1,numpts);
-eventData(2,alertFrame) = 1;
+eventData(2,alertFrame:alertFrame+alertDuration) = 1;
 
 % Save data
 writematrix(eventData,'data/eventData.csv')

@@ -158,7 +158,7 @@ displayData(12,DistIncrements(3)+1:DistIncrements(4)) = linspace(0,0,DistIncreme
 displayData(12,:) = round(displayData(12,:),1);
 % plot(displayData(12,:))
 
-%% Row 13: EVA Task Instructions. Hard-coded to match video/minimap
+% EVA Task Instructions. Hard-coded to match video/minimap
 evaInstructions(1,numpts) = "NA";
 evaInstructions(1,1:taskIncs(1)) = "Proceed to LEM";
 evaInstructions(1,taskIncs(1):taskIncs(2)) = strcat(evaInstructions(taskIncs(1))," Gather Supplies");
@@ -167,7 +167,7 @@ evaInstructions(1,taskIncs(3):taskIncs(4)) = strcat(evaInstructions(taskIncs(3))
 evaInstructions(1,taskIncs(4):taskIncs(5)) = strcat(evaInstructions(taskIncs(4))," Drill Sample");
 evaInstructions(1,taskIncs(5):taskIncs(6)) = strcat(evaInstructions(taskIncs(5))," Return to LEM");
 
-%% Save data
+% Save data
 writematrix(displayData,'data/displayDataNominal.csv')
 writematrix(evaInstructions,'data/evaInstructions.csv')
 

@@ -10,6 +10,14 @@ numpts = 2617;
 fps = 59.94;
 stopSec = 23; % When we stop moving in HUD footage - hardcoded
 stopFrame = round(stopSec*fps);
+% Hard-coded times: at 10 sec closest to LEM. Stable for 3 sec. Moving away
+% from LEM up to 23 sec. Stable to end of video
+DistIncrements = [round(fps*[10,10+3,23]) numpts];
+% Hard-coded times: based on rotations in HUDFootage
+% Rotations go W, WtoN, NtoE, E, EtoN, N, NtoE, E, EtoN, N, NtoE
+RotIncs = [round(fps*[2,4,6,9,11,13,16,20,24,29,41]) numpts];
+% Task Increments
+taskIncs = [round(fps*[10,13,23,26,35]) numpts];
 
 %% Create Event Data
 % Event data - binary 0 or 1
@@ -107,19 +115,75 @@ displayData(8,:) = round(0.1+0.015*randn(1,numpts), 1);
 displayData(9,:) = zeros(1,numpts);
 
 % Row 10: Compass Data. Hard-coded to match video 
+displayData(10,:) = zeros(1,numpts);
+% 90 is North, 180 is West, 270 is S, 0 is E
+north = 90; west = 180; east = 0;
+displayData(10,1:RotIncs(1)) = linspace(west,west,RotIncs(1)); % W
+displayData(10,RotIncs(1)+1:RotIncs(2)) = linspace(west,north,RotIncs(2)-RotIncs(1)); % W to N
+displayData(10,RotIncs(2)+1:RotIncs(3)) = linspace(north,north,RotIncs(3)-RotIncs(2)); % N 
+displayData(10,RotIncs(3)+1:RotIncs(4)) = linspace(north,east,RotIncs(4)-RotIncs(3)); % N to E
+displayData(10,RotIncs(4)+1:RotIncs(5)) = linspace(east,east,RotIncs(5)-RotIncs(4)); % E
+displayData(10,RotIncs(5)+1:RotIncs(6)) = linspace(east,north,RotIncs(6)-RotIncs(5)); % E to N
+displayData(10,RotIncs(6)+1:RotIncs(7)) = linspace(north,north,RotIncs(7)-RotIncs(6)); % N
+displayData(10,RotIncs(7)+1:RotIncs(8)) = linspace(north,east,RotIncs(8)-RotIncs(7)); % N to E
+displayData(10,RotIncs(8)+1:RotIncs(9)) = linspace(east,east,RotIncs(9)-RotIncs(8)); % E
+displayData(10,RotIncs(9)+1:RotIncs(10)) = linspace(east,north,RotIncs(10)-RotIncs(9)); % E to N
+displayData(10,RotIncs(10)+1:RotIncs(11)) = linspace(north,north,RotIncs(11)-RotIncs(10)); % N
+displayData(10,RotIncs(11)+1:RotIncs(12)) = linspace(north,east,RotIncs(12)-RotIncs(11)); % N to E
+%plot(displayData(10,:))
 
 % Row 11: Distance to LEM. Hard-coded to match minimap
+displayData(11,:) = zeros(1,numpts);
+% Assume start 35 m from LEM, end 5m from LEM
+displayData(11,1:DistIncrements(1)) = linspace(25,5,DistIncrements(1));
+% Stable for 3 seconds
+displayData(11,DistIncrements(1)+1:DistIncrements(2)) = linspace(5,5,DistIncrements(2)-DistIncrements(1));
+% Move away until 23 seconds. Go from 5m to 20m at ROI1
+displayData(11,DistIncrements(2)+1:DistIncrements(3)) = linspace(5,20,DistIncrements(3)-DistIncrements(2));
+% Stable until end
+displayData(11,DistIncrements(3)+1:DistIncrements(4)) = linspace(20,20,DistIncrements(4)-DistIncrements(3));
+displayData(11,:) = round(displayData(11,:),1);
+%plot(displayData(11,:))
 
 % Row 12: Distance to ROI1. Hard-coded to match minimap
+displayData(12,:) = zeros(1,numpts);
+% Assume start 40 m from ROI1, end 13m from ROI1
+displayData(12,1:DistIncrements(1)) = linspace(40,17,DistIncrements(1));
+% Stable for 3 seconds
+displayData(12,DistIncrements(1)+1:DistIncrements(2)) = linspace(17,17,DistIncrements(2)-DistIncrements(1));
+% Move away until 23 seconds. Go from 13m to 0m at ROI1
+displayData(12,DistIncrements(2)+1:DistIncrements(3)) = linspace(17,0,DistIncrements(3)-DistIncrements(2));
+% Stable until end
+displayData(12,DistIncrements(3)+1:DistIncrements(4)) = linspace(0,0,DistIncrements(4)-DistIncrements(3));
+displayData(12,:) = round(displayData(12,:),1);
+% plot(displayData(12,:))
 
-% Row 13: EVA Task Instructions. Hard-coded to match video/minimap
+%% Row 13: EVA Task Instructions. Hard-coded to match video/minimap
+evaInstructions(1,numpts) = "NA";
+evaInstructions(1,1:taskIncs(1)) = "Proceed to LEM";
+evaInstructions(1,taskIncs(1):taskIncs(2)) = strcat(evaInstructions(taskIncs(1))," Gather Supplies");
+evaInstructions(1,taskIncs(2):taskIncs(3)) = strcat(evaInstructions(taskIncs(2))," Proceed to ROI 1");
+evaInstructions(1,taskIncs(3):taskIncs(4)) = strcat(evaInstructions(taskIncs(3))," Identify Sample");
+evaInstructions(1,taskIncs(4):taskIncs(5)) = strcat(evaInstructions(taskIncs(4))," Drill Sample");
+evaInstructions(1,taskIncs(5):taskIncs(6)) = strcat(evaInstructions(taskIncs(5))," Return to LEM");
 
-% Save data
+%% Save data
 writematrix(displayData,'data/displayDataNominal.csv')
+writematrix(evaInstructions,'data/evaInstructions.csv')
 
 %% Create Suit Leak/hypoxia data
 % Use nominal display data as base. Upon hypoxia alert frame, change data
 displayDataSuitLeak = displayData;
 
+% Make alterations to the nominal data - 
+% For example: displayData(3,alertFrame:alertFrame+alertDuration) = 0;
+% ^ this would cause an alarm for CO2 scrubber turned off (set to 0) at
+% frame 25 until frame 40
+
+% We can do this for whatever makes sense for each event! I think a suit
+% leak one would be cool - oxygen dips fast, HR goes up, pressure down, etc
+% ^ this would be like a hypoxia scenario
+
+
 % Save data
-writematrix(displayDataSuitLeak,'data/displayDataSuitLeak.csv')
+%writematrix(displayDataSuitLeak,'data/displayDataSuitLeak.csv')

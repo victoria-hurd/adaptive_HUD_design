@@ -209,15 +209,15 @@ writematrix(displayDataSuitLeak,'data/displayDataSuitLeak.csv')
 % Use nominal display data as base. Upon excessive workload alert frame, change data
 displayDataWorkload = displayData;
 
-% Heart rate increases
+% Heart rate increases and then decreases back to nom conditions
 displayDataWorkload(6,alertFrame_work:alertFrame_work+alertDuration/2) = linspace(120, 175, (alertDuration/2)+1);
 displayDataWorkload(6,alertFrame_work+alertDuration/2:alertFrame_work+alertDuration) = linspace(175, 120, (alertDuration/2)+1);
 
-% O2 consumption rate increases
+% O2 consumption rate increases and then decreases back to nom conditions
 displayDataWorkload(8,alertFrame_work:alertFrame_work+alertDuration/2) = linspace(.18, .5, (alertDuration/2)+1);
 displayDataWorkload(8,alertFrame_work+alertDuration/2:alertFrame_work+alertDuration) = linspace(.5, .1, (alertDuration/2)+1);
 
-% Respiration rate increases
+% Respiration rate increases and then decreases back to nom conditions
 displayDataWorkload(7,alertFrame_work:alertFrame_work+alertDuration/2) = linspace(25, 40, (alertDuration/2)+1);
 displayDataWorkload(7,alertFrame_work+alertDuration/2:alertFrame_work+alertDuration) = linspace(40, 20, (alertDuration/2)+1);
 

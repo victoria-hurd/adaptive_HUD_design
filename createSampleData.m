@@ -187,3 +187,82 @@ displayDataSuitLeak = displayData;
 
 % Save data
 %writematrix(displayDataSuitLeak,'data/displayDataSuitLeak.csv')
+
+%% Anomalies
+%% Crater Condition
+% Use nominal display data as base. Upon hypoxia alert frame, change data
+displayCrater = displayData;
+
+% Row 2: Oxygen Levels from 0 to 1. Nominal is slow, constant decrease
+%   Go from 95% to 75%
+% Row 3: CO2 Scrubber Status. Binary 0 or 1, Nominal is 1
+% Row 4: Suit Operating Pressure. Nominal 4.3psi. Round to 1 dec place
+%   Use mean of 4.3psi, std of 0.05 psi
+%   step1Result = mean + std * randn(1,numpts);
+% Row 5: Remaining Battery life. Nominal is slow, constant decrease
+%   Go from 85% to 60%
+% Row 6: Heart Rate. Nominal is between 90 and 130. 
+%   While moving, keep HR high. After stopping, make lower. 
+%   Moving mean: 120+/-10std. Stopped mean: 100+/-10std
+%   We need to smooth this data now. From: https://www.mathworks.com/matlabcentral/answers/1830828-how-to-create-a-random-and-smooth-varying-rpm-profile
+%   filter the vector
+%   scale/translate the vector
+% Row 7: Respiration Rate. 12 to 20 is normal
+%   Use same method as row 6
+%   Let mean be 15 brpm, std of 5
+% Row 8: O2 Consumption Rate. Nominal is 0.1 psi/min
+% Row 9: Cognitive Load. Nominal is 0, abnormal is 1
+% Row 10: Compass Data. Hard-coded to match video 
+
+% Define frames for each phase
+fatigueStart = 1; fatigueEnd = round(numpts*0.4);
+stressStart = fatigueEnd + 1; stressEnd = round(numpts*0.7);
+hypoxiaStart = stressEnd + 1; hypoxiaEnd = round(numpts*0.9);
+
+% Fatigue Phase: Increase HR and RR
+displayCrater(6, fatigueStart:fatigueEnd) = ...
+    round(120 + 15 * randn(1, fatigueEnd - fatigueStart + 1)); % HR
+displayCrater(7, fatigueStart:fatigueEnd) = ...
+    round(17 + 3 * randn(1, fatigueEnd - fatigueStart + 1)); % RR
+
+% Stress Phase: Increase HR, RR, and Cognitive Load
+displayCrater(6, stressStart:stressEnd) = ...
+    round(140 + 20 * randn(1, stressEnd - stressStart + 1)); % HR
+displayCrater(7, stressStart:stressEnd) = ...
+    round(20 + 5 * randn(1, stressEnd - stressStart + 1)); % RR
+displayCrater(9, stressStart:stressEnd) = 1; % Cognitive Load
+
+% Hypoxia Phase: Decrease O2 levels, increase HR and RR, pressure drop
+displayCrater(2, hypoxiaStart:hypoxiaEnd) = ...
+    linspace(75, 50, hypoxiaEnd - hypoxiaStart + 1); % O2 Levels
+displayCrater(6, hypoxiaStart:hypoxiaEnd) = ...
+    round(160 + 25 * randn(1, hypoxiaEnd - hypoxiaStart + 1)); % HR
+displayCrater(7, hypoxiaStart:hypoxiaEnd) = ...
+    round(25 + 6 * randn(1, hypoxiaEnd - hypoxiaStart + 1)); % RR
+displayCrater(4, hypoxiaStart:hypoxiaEnd) = ...
+    round(4.0 + 0.05 * randn(1, hypoxiaEnd - hypoxiaStart + 1), 1); % Pressure
+displayCrater(8, hypoxiaStart:hypoxiaEnd) = ...
+    round(0.15 + 0.02 * randn(1, hypoxiaEnd - hypoxiaStart + 1), 2); % O2 Consumption
+
+% Recovery Phase: Normalize data
+displayCrater(2, hypoxiaEnd+1:end) = linspace(50, 95, numpts - hypoxiaEnd);
+displayCrater(6, hypoxiaEnd+1:end) = ...
+    round(100 + 10 * randn(1, numpts - hypoxiaEnd));
+displayCrater(7, hypoxiaEnd+1:end) = ...
+    round(15 + 3 * randn(1, numpts - hypoxiaEnd));
+displayCrater(4, hypoxiaEnd+1:end) = ...
+    round(4.3 + 0.05 * randn(1, numpts - hypoxiaEnd), 1);
+displayCrater(9, hypoxiaEnd+1:end) = 0; % Remove Cognitive Load
+
+% Make alterations to the nominal data - 
+% For example: displayData(3,alertFrame:alertFrame+alertDuration) = 0;
+% ^ this would cause an alarm for CO2 scrubber turned off (set to 0) at
+% frame 25 until frame 40
+
+% We can do this for whatever makes sense for each event! I think a suit
+% leak one would be cool - oxygen dips fast, HR goes up, pressure down, etc
+% ^ this would be like a hypoxia scenario
+
+
+% Save data
+%writematrix(displayDataSuitLeak,'data/displayDataSuitLeak.csv')

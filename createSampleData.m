@@ -23,17 +23,26 @@ taskIncs = [round(fps*[10,13,23,26,35]) numpts];
 % Event data - binary 0 or 1
 % % 1 indicates alert, 0 indicates no alert
 % Alerts should stay for 15 frames
-alertDuration = 15;
+alertDuration = 50;
 % Zeros for [number of types of alerts, frames of HUDfootage]
-eventData(2,:) = zeros(1,numpts);
+eventData(4,:) = zeros(1,numpts);
 
 % Create data matrix
 % Row 1: Frame/"time point"
 eventData(1,:) = 1:numpts;
 % Row 2: Suit Leak/Hypoxia Alert
-% Create alert at frame 25 - this can get changed
-alertFrame = 25;
-eventData(2,alertFrame:alertFrame+alertDuration) = 1;
+% Create alert at frame 1800
+alertFrame_hypox = 100;
+eventData(2,alertFrame_hypox:alertFrame_hypox+alertDuration) = 1;
+
+% Row 3: Excessive Workload Alert
+alertFrame_work = 20;
+eventData(3,alertFrame_work:alertFrame_work+alertDuration) = 1;
+
+% Row 4: Low battery Alert
+alertFrame_batt = 200;
+eventData(4,alertFrame_batt:alertFrame_batt+alertDuration) = 1;
+
 
 % Save data
 writematrix(eventData,'data/eventData.csv')
@@ -85,7 +94,7 @@ HRrange = [90 130];
 HRrange0 = [min(displayData(6,:)) max(displayData(6,:))];
 displayData(6,:) = (displayData(6,:)-HRrange0(1))/range(HRrange0); % normalize
 displayData(6,:) = displayData(6,:)*range(HRrange) + HRrange(1); % rescale
-plot(displayData(6,:)); xlabel('Frame'); ylabel('HR'); title('Simulated HR per Frame')
+%plot(displayData(6,:)); xlabel('Frame'); ylabel('HR'); title('Simulated HR per Frame')
 % Finally, round to nearest integer
 displayData(6,:) = round(displayData(6,:));
 
@@ -104,7 +113,7 @@ RRrange = [12 17];
 RRrange0 = [min(displayData(7,:)) max(displayData(7,:))];
 displayData(7,:) = (displayData(7,:)-RRrange0(1))/range(RRrange0); % normalize
 displayData(7,:) = displayData(7,:)*range(RRrange) + RRrange(1); % rescale
-plot(displayData(7,:)); xlabel('Frame'); ylabel('RR'); title('Simulated RR per Frame')
+%plot(displayData(7,:)); xlabel('Frame'); ylabel('RR'); title('Simulated RR per Frame');
 % Finally, round to nearest integer
 displayData(7,:) = floor(displayData(7,:));
 
@@ -175,6 +184,58 @@ writematrix(evaInstructions,'data/evaInstructions.csv')
 % Use nominal display data as base. Upon hypoxia alert frame, change data
 displayDataSuitLeak = displayData;
 
+% Oxygen levels go from 60 to 40)
+displayDataSuitLeak(2,alertFrame_hypox:alertFrame_hypox+alertDuration-1) = linspace(60,40,alertDuration);
+
+% Suit operating pressure goes down to 2.1 psi
+displayDataSuitLeak(4,alertFrame_hypox:alertFrame_hypox+alertDuration-1) = linspace(3.6, 2.1, alertDuration);
+
+% CO2 Scrubber status goes to 0
+displayDataSuitLeak(3,alertFrame_hypox:alertFrame_hypox+alertDuration) = 0;
+
+% Heart Rate increases
+displayDataSuitLeak(6,alertFrame_hypox:alertFrame_hypox+alertDuration-1) = linspace(130,150,alertDuration);
+
+% Respiration rate increases
+displayDataSuitLeak(7,alertFrame_hypox:alertFrame_hypox+alertDuration-1) = linspace(20,35,alertDuration);
+
+% Cognitive Load increases
+displayDataSuitLeak(9,alertFrame_hypox:alertFrame_hypox+alertDuration-1) = 1;
+
+% Save data
+writematrix(displayDataSuitLeak,'data/displayDataSuitLeak.csv')
+
+%% Create Overexertion Event
+% Use nominal display data as base. Upon excessive workload alert frame, change data
+displayDataWorkload = displayData;
+
+% Heart rate increases
+displayDataWorkload(6,alertFrame_work:alertFrame_work+alertDuration/2) = linspace(120, 175, (alertDuration/2)+1);
+displayDataWorkload(6,alertFrame_work+alertDuration/2:alertFrame_work+alertDuration) = linspace(175, 120, (alertDuration/2)+1);
+
+% O2 consumption rate increases
+displayDataWorkload(8,alertFrame_work:alertFrame_work+alertDuration/2) = linspace(.18, .5, (alertDuration/2)+1);
+displayDataWorkload(8,alertFrame_work+alertDuration/2:alertFrame_work+alertDuration) = linspace(.5, .1, (alertDuration/2)+1);
+
+% Respiration rate increases
+displayDataWorkload(7,alertFrame_work:alertFrame_work+alertDuration/2) = linspace(25, 40, (alertDuration/2)+1);
+displayDataWorkload(7,alertFrame_work+alertDuration/2:alertFrame_work+alertDuration) = linspace(40, 20, (alertDuration/2)+1);
+
+% Save data
+writematrix(displayDataWorkload,'data/displayDataWorkload.csv')
+
+%% Create Low Battery Event
+% Use nominal display data as base. Upon excessive workload alert frame, change data
+displayDataBattery = displayData;
+
+% Battery reduces!
+displayDataBattery(7,alertFrame_batt:alertFrame_batt+alertDuration-1) = linspace(40,25,alertDuration);
+
+
+
+% Save data
+writematrix(displayDataBattery,'data/displayDataBattery.csv')
+
 % Make alterations to the nominal data - 
 % For example: displayData(3,alertFrame:alertFrame+alertDuration) = 0;
 % ^ this would cause an alarm for CO2 scrubber turned off (set to 0) at
@@ -185,5 +246,3 @@ displayDataSuitLeak = displayData;
 % ^ this would be like a hypoxia scenario
 
 
-% Save data
-%writematrix(displayDataSuitLeak,'data/displayDataSuitLeak.csv')

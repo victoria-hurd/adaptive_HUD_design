@@ -25,6 +25,8 @@ taskIncs = [round(fps*[10,13,23,26,35]) numpts];
 % Alerts should stay for 15 frames
 alertDuration = 50;
 % Zeros for [number of types of alerts, frames of HUDfootage]
+eventData(2,:) = zeros(1,numpts);
+eventData(3,:) = zeros(1,numpts);
 eventData(4,:) = zeros(1,numpts);
 
 % Create data matrix
@@ -32,15 +34,15 @@ eventData(4,:) = zeros(1,numpts);
 eventData(1,:) = 1:numpts;
 % Row 2: Suit Leak/Hypoxia Alert
 % Create alert at frame 1800
-alertFrame_hypox = 100;
+alertFrame_hypox = 1000;
 eventData(2,alertFrame_hypox:alertFrame_hypox+alertDuration) = 1;
 
 % Row 3: Excessive Workload Alert
-alertFrame_work = 20;
+alertFrame_work = 2000;
 eventData(3,alertFrame_work:alertFrame_work+alertDuration) = 1;
 
 % Row 4: Low battery Alert
-alertFrame_batt = 200;
+alertFrame_batt = 1500;
 eventData(4,alertFrame_batt:alertFrame_batt+alertDuration) = 1;
 
 
@@ -177,7 +179,7 @@ evaInstructions(1,taskIncs(4):taskIncs(5)) = strcat(evaInstructions(taskIncs(4))
 evaInstructions(1,taskIncs(5):taskIncs(6)) = strcat(evaInstructions(taskIncs(5))," Return to LEM");
 
 % Save data
-writematrix(displayData,'data/displayDataNominal.csv')
+% writematrix(displayData,'data/displayDataNominal.csv')
 writematrix(evaInstructions,'data/evaInstructions.csv')
 
 %% Create Suit Leak/hypoxia data
@@ -203,11 +205,11 @@ displayDataSuitLeak(7,alertFrame_hypox:alertFrame_hypox+alertDuration-1) = linsp
 displayDataSuitLeak(9,alertFrame_hypox:alertFrame_hypox+alertDuration-1) = 1;
 
 % Save data
-writematrix(displayDataSuitLeak,'data/displayDataSuitLeak.csv')
+% writematrix(displayDataSuitLeak,'data/displayDataSuitLeak.csv')
 
 %% Create Overexertion Event
 % Use nominal display data as base. Upon excessive workload alert frame, change data
-displayDataWorkload = displayData;
+displayDataWorkload = displayDataSuitLeak;
 
 % Heart rate increases and then decreases back to nom conditions
 displayDataWorkload(6,alertFrame_work:alertFrame_work+alertDuration/2) = linspace(120, 175, (alertDuration/2)+1);
@@ -226,7 +228,7 @@ writematrix(displayDataWorkload,'data/displayDataWorkload.csv')
 
 %% Create Low Battery Event
 % Use nominal display data as base. Upon excessive workload alert frame, change data
-displayDataBattery = displayData;
+displayDataBattery = displayDataWorkload;
 
 % Battery reduces!
 displayDataBattery(7,alertFrame_batt:alertFrame_batt+alertDuration-1) = linspace(40,25,alertDuration);
@@ -234,7 +236,7 @@ displayDataBattery(7,alertFrame_batt:alertFrame_batt+alertDuration-1) = linspace
 
 
 % Save data
-writematrix(displayDataBattery,'data/displayDataBattery.csv')
+writematrix(displayDataBattery,'data/displayDataAllAlerts.csv')
 
 % Make alterations to the nominal data - 
 % For example: displayData(3,alertFrame:alertFrame+alertDuration) = 0;

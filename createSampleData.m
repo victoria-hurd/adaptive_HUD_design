@@ -34,15 +34,15 @@ eventData(4,:) = zeros(1,numpts);
 eventData(1,:) = 1:numpts;
 % Row 2: Suit Leak/Hypoxia Alert
 % Create alert at frame 1800
-alertFrame_hypox = 1000;
+alertFrame_hypox = 100;
 eventData(2,alertFrame_hypox:alertFrame_hypox+alertDuration) = 1;
 
 % Row 3: Excessive Workload Alert
-alertFrame_work = 2000;
+alertFrame_work = 20;
 eventData(3,alertFrame_work:alertFrame_work+alertDuration) = 1;
 
 % Row 4: Low battery Alert
-alertFrame_batt = 1500;
+alertFrame_batt = 200;
 eventData(4,alertFrame_batt:alertFrame_batt+alertDuration) = 1;
 
 

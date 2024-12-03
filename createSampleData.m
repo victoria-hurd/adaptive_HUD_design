@@ -231,7 +231,7 @@ writematrix(displayDataWorkload,'data/displayDataWorkload.csv')
 displayDataBattery = displayDataWorkload;
 
 % Battery reduces!
-displayDataBattery(7,alertFrame_batt:alertFrame_batt+alertDuration-1) = linspace(40,25,alertDuration);
+displayDataBattery(5,alertFrame_batt:alertFrame_batt+alertDuration-1) = linspace(40,25,alertDuration);
 
 
 
